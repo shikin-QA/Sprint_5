@@ -1,5 +1,3 @@
-import time
-
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -16,14 +14,13 @@ from locators import (
     REGISTER_PASSWORD_INPUT,
     REGISTER_BUTTON,
     ORDER_BUTTON,
-    PERSONAL_ACCOUNT_LINK,
     LOGOUT_BUTTON,
     LOGIN_EMAIL_INPUT,
     LOGIN_PASSWORD_INPUT,
     LOGIN_BUTTON,
 )
 
-TIMEOUT = 30  # увеличенный таймаут — сайт медленный
+TIMEOUT = 30
 
 
 @pytest.fixture
@@ -37,7 +34,7 @@ def driver():
 
 @pytest.fixture
 def registered_user(driver):
-    """Регистрирует пользователя, логинится (если нужно) и выходит. Возвращает (email, password)."""
+    """Регистрирует пользователя, логинится и выходит. Возвращает (email, password)."""
     email = generate_login()
     password = generate_password()
 
@@ -58,16 +55,21 @@ def registered_user(driver):
         EC.element_to_be_clickable(REGISTER_BUTTON)
     ).click()
 
-    # 2. Даём бэкенду время
-    time.sleep(2)
-
-    # 3. Проверяем — не авторизованы ли уже
-    if len(driver.find_elements(*ORDER_BUTTON)) == 0:
-        # Если нет — идём на /login и логинимся
+    # 2. Ждём либо редирект на /login, либо форму входа
+    WebDriverWait(driver, TIMEOUT).until(
+        EC.any_of(
+            EC.url_contains("/login"),
+            EC.visibility_of_element_located(LOGIN_EMAIL_INPUT),
+        )
+    )
+    if "/login" not in driver.current_url:
         driver.get(BASE_URL.rstrip("/") + "/login")
         WebDriverWait(driver, TIMEOUT).until(
             EC.visibility_of_element_located(LOGIN_EMAIL_INPUT)
         )
+
+    # 3. Логин (если уже авторизованы — пропускаем)
+    if len(driver.find_elements(*ORDER_BUTTON)) == 0:
         driver.find_element(*LOGIN_EMAIL_INPUT).send_keys(email)
         driver.find_element(*LOGIN_PASSWORD_INPUT).send_keys(password)
         WebDriverWait(driver, TIMEOUT).until(

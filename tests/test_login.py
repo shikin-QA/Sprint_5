@@ -19,53 +19,52 @@ def login(driver, email, password):
     )
 
 
-def test_login_from_main_page(driver, registered_user):
-    email, password = registered_user
-    driver.get(BASE_URL)
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
-    ).click()
-    login(driver, email, password)
-    assert driver.find_element(*ORDER_BUTTON).is_displayed()
+class TestLogin:
 
+    def test_login_from_main_page(self, driver, registered_user):
+        email, password = registered_user
+        driver.get(BASE_URL)
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
+        ).click()
+        login(driver, email, password)
+        assert driver.find_element(*ORDER_BUTTON).is_displayed()
 
-def test_login_from_personal_account(driver, registered_user):
-    email, password = registered_user
-    driver.get(BASE_URL)
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(PERSONAL_ACCOUNT_LINK)
-    ).click()
-    login(driver, email, password)
-    assert driver.find_element(*ORDER_BUTTON).is_displayed()
+    def test_login_from_personal_account(self, driver, registered_user):
+        email, password = registered_user
+        driver.get(BASE_URL)
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(PERSONAL_ACCOUNT_LINK)
+        ).click()
+        login(driver, email, password)
+        assert driver.find_element(*ORDER_BUTTON).is_displayed()
 
+    def test_login_from_registration_form(self, driver, registered_user):
+        email, password = registered_user
+        driver.get(BASE_URL)
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
+        ).click()
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(REGISTER_LINK)
+        ).click()
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(LOGIN_LINK)
+        ).click()
+        login(driver, email, password)
+        assert driver.find_element(*ORDER_BUTTON).is_displayed()
 
-def test_login_from_registration_form(driver, registered_user):
-    email, password = registered_user
-    driver.get(BASE_URL)
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
-    ).click()
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(REGISTER_LINK)
-    ).click()
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(LOGIN_LINK)
-    ).click()
-    login(driver, email, password)
-    assert driver.find_element(*ORDER_BUTTON).is_displayed()
-
-
-def test_login_from_forgot_password_form(driver, registered_user):
-    email, password = registered_user
-    driver.get(BASE_URL)
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
-    ).click()
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(FORGOT_PASSWORD_LINK)
-    ).click()
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(LOGIN_LINK)
-    ).click()
-    login(driver, email, password)
-    assert driver.find_element(*ORDER_BUTTON).is_displayed()
+    def test_login_from_forgot_password_form(self, driver, registered_user):
+        email, password = registered_user
+        driver.get(BASE_URL)
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
+        ).click()
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(FORGOT_PASSWORD_LINK)
+        ).click()
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(LOGIN_LINK)
+        ).click()
+        login(driver, email, password)
+        assert driver.find_element(*ORDER_BUTTON).is_displayed()

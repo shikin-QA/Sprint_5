@@ -1,5 +1,3 @@
-import time
-
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -9,63 +7,72 @@ from locators import *
 TIMEOUT = 30
 
 
-def test_successful_registration(driver):
-    email = generate_login()
-    password = generate_password()
+class TestRegistration:
 
-    driver.get(BASE_URL)
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
-    ).click()
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(REGISTER_LINK)
-    ).click()
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.visibility_of_element_located(REGISTER_NAME_INPUT)
-    ).send_keys("Test")
-    driver.find_element(*REGISTER_EMAIL_INPUT).send_keys(email)
-    driver.find_element(*REGISTER_PASSWORD_INPUT).send_keys(password)
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(REGISTER_BUTTON)
-    ).click()
+    def test_successful_registration(self, driver):
+        email = generate_login()
+        password = generate_password()
 
-    time.sleep(2)
-    driver.get(BASE_URL.rstrip("/") + "/login")
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.visibility_of_element_located(LOGIN_EMAIL_INPUT)
-    )
-    driver.find_element(*LOGIN_EMAIL_INPUT).send_keys(email)
-    driver.find_element(*LOGIN_PASSWORD_INPUT).send_keys(password)
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(LOGIN_BUTTON)
-    ).click()
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.visibility_of_element_located(ORDER_BUTTON)
-    )
-    assert driver.find_element(*ORDER_BUTTON).is_displayed()
+        driver.get(BASE_URL)
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
+        ).click()
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(REGISTER_LINK)
+        ).click()
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.visibility_of_element_located(REGISTER_NAME_INPUT)
+        ).send_keys("Test")
+        driver.find_element(*REGISTER_EMAIL_INPUT).send_keys(email)
+        driver.find_element(*REGISTER_PASSWORD_INPUT).send_keys(password)
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(REGISTER_BUTTON)
+        ).click()
 
+        # Ждём либо редирект, либо форму входа
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.any_of(
+                EC.url_contains("/login"),
+                EC.visibility_of_element_located(LOGIN_EMAIL_INPUT),
+            )
+        )
+        if "/login" not in driver.current_url:
+            driver.get(BASE_URL.rstrip("/") + "/login")
+            WebDriverWait(driver, TIMEOUT).until(
+                EC.visibility_of_element_located(LOGIN_EMAIL_INPUT)
+            )
 
-def test_registration_with_short_password(driver):
-    email = generate_login()
-    password = "12345"
+        driver.find_element(*LOGIN_EMAIL_INPUT).send_keys(email)
+        driver.find_element(*LOGIN_PASSWORD_INPUT).send_keys(password)
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(LOGIN_BUTTON)
+        ).click()
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.visibility_of_element_located(ORDER_BUTTON)
+        )
+        assert driver.find_element(*ORDER_BUTTON).is_displayed()
 
-    driver.get(BASE_URL)
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
-    ).click()
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(REGISTER_LINK)
-    ).click()
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.visibility_of_element_located(REGISTER_NAME_INPUT)
-    ).send_keys("Test")
-    driver.find_element(*REGISTER_EMAIL_INPUT).send_keys(email)
-    driver.find_element(*REGISTER_PASSWORD_INPUT).send_keys(password)
-    WebDriverWait(driver, TIMEOUT).until(
-        EC.element_to_be_clickable(REGISTER_BUTTON)
-    ).click()
+    def test_registration_with_short_password(self, driver):
+        email = generate_login()
+        password = "12345"
 
-    error = WebDriverWait(driver, TIMEOUT).until(
-        EC.visibility_of_element_located(PASSWORD_ERROR)
-    )
-    assert error.text == "Некорректный пароль"
+        driver.get(BASE_URL)
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(LOGIN_ACCOUNT_BUTTON)
+        ).click()
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(REGISTER_LINK)
+        ).click()
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.visibility_of_element_located(REGISTER_NAME_INPUT)
+        ).send_keys("Test")
+        driver.find_element(*REGISTER_EMAIL_INPUT).send_keys(email)
+        driver.find_element(*REGISTER_PASSWORD_INPUT).send_keys(password)
+        WebDriverWait(driver, TIMEOUT).until(
+            EC.element_to_be_clickable(REGISTER_BUTTON)
+        ).click()
+
+        error = WebDriverWait(driver, TIMEOUT).until(
+            EC.visibility_of_element_located(PASSWORD_ERROR)
+        )
+        assert error.text == "Некорректный пароль"
